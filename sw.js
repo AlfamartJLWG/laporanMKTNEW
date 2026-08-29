@@ -1,5 +1,5 @@
 // sw.js
-const CACHE_NAME = 'mkt-report-v1';
+const CACHE_NAME = 'mkt-report-v2';
 const assetsToCache = [
   'index.html',
   'style.css',
