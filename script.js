@@ -1,9 +1,11 @@
 // script.js
 
-// MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkvUoc6mCEkOhFWFclBXOvNnJZ2xds8rArK3WbpgQNqv3avPzIu19gTs96_s9pAJd2/exec";
-const STORAGE_KEY = "REPORT_DRAFT_DATA"; // Kunci untuk Local Storage
+// ⚠️ PENTING: GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT MILIK ANDA
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbySwzGj9zOeiyUafdjEsZQIJj4VETGUpOIfAm8ra-KniAB0uPlsV2vQzl1g1t878XRU/exec"; 
+const STORAGE_KEY = "REPORT_DRAFT_DATA";
 
+// Data metrik bawaan (Hardcode)
+// Digunakan sebagai nilai awal atau fallback jika gagal mengambil target dinamis dari server.
 const metrics = [
     { id: 'spd', label: 'SPD', target: 30776167 },
     { id: 'std', label: 'STD', target: 388 },
@@ -28,22 +30,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('tanggal').value = today;
 
-    // 1. Render tabel input terlebih dahulu
+    // 1. Gambar tabel input
     renderTable();
 
-    // 2. Muat data draft dari Local Storage (jika ada)
+    // 2. Muat draft dari Local Storage (jika ada sisa inputan sebelumnya)
     loadDraft();
 
-    // Event listener untuk memantau perubahan input Header
+    // 3. Pasang pendeteksi perubahan pada input teks header
     document.getElementById('tanggal').addEventListener('input', generateReport);
     document.getElementById('shift').addEventListener('input', generateReport);
     document.getElementById('staf').addEventListener('input', generateReport);
     document.getElementById('crew').addEventListener('input', generateReport);
     
-    // Generate text awal berdasarkan draft yang dimuat
+    // 4. Generate text laporan awal
     generateReport();
     
-    // Tarik data target dinamis dari server
+    // 5. Tarik angka target terbaru dari Google Sheets (Target Dinamis)
     fetchDynamicTargets();
 });
 
@@ -78,6 +80,7 @@ function formatNumber(numStr) {
 }
 
 function generateReport() {
+    // Sinkronisasi STD ke Target NPS
     const actualStdValue = document.getElementById('a_std').value;
     const targetNpsInput = document.getElementById('t_nps');
     
@@ -87,6 +90,7 @@ function generateReport() {
         targetNpsInput.value = 100;
     }
 
+    // Hitung Actual APC otomatis
     const actualSpdRaw = document.getElementById('a_spd').value;
     const apcInput = document.getElementById('a_apc');
     if (actualSpdRaw && actualStdValue && parseFloat(actualStdValue) > 0) {
@@ -95,12 +99,14 @@ function generateReport() {
         apcInput.value = "";
     }
 
+    // Ambil data header
     const rawTanggal = document.getElementById('tanggal').value;
     let formattedDate = rawTanggal ? new Date(rawTanggal).toLocaleDateString('id-ID') : "";
     const shift = document.getElementById('shift').value.toUpperCase();
     const staf = document.getElementById('staf').value.toUpperCase();
     const crew = document.getElementById('crew').value.toUpperCase();
 
+    // Mulai susun teks laporan
     let txt = `🟦 FOKUS MKT & SALES*\n`;
     txt += `🔹TANGGAL : ${formattedDate}\n`;
     txt += `SIFT : ${shift}\n`;
@@ -112,6 +118,7 @@ function generateReport() {
         const targetRaw = document.getElementById(`t_${m.id}`).value;
         let actualRaw = document.getElementById(`a_${m.id}`).value;
         
+        // Pastikan APC masuk ke teks
         if (m.id === 'apc' && apcInput.value) actualRaw = apcInput.value;
 
         const target = formatNumber(targetRaw);
@@ -132,14 +139,14 @@ function generateReport() {
         txt += `- ${displayLabel} :${target}/ ${actual}/ ${acv}\n`;
     });
 
+    // Tampilkan di textarea
     document.getElementById('output-text').value = txt;
     
-    // Panggil fungsi simpan setiap kali laporan di-generate ulang
+    // Simpan otomatis ke Local Storage setiap ada perubahan
     saveDraft(); 
 }
 
-// === FITUR LOCAL STORAGE ===
-
+// === FITUR LOCAL STORAGE (SIMPAN DRAFT) ===
 function saveDraft() {
     const draftData = {
         tanggal: document.getElementById('tanggal').value,
@@ -163,31 +170,33 @@ function loadDraft() {
     if (saved) {
         try {
             const draftData = JSON.parse(saved);
-            
-            // Kembalikan header
             if (draftData.tanggal) document.getElementById('tanggal').value = draftData.tanggal;
             if (draftData.shift) document.getElementById('shift').value = draftData.shift;
             if (draftData.staf) document.getElementById('staf').value = draftData.staf;
             if (draftData.crew) document.getElementById('crew').value = draftData.crew;
             
-            // Kembalikan actual values
             metrics.forEach(m => {
                 if (!m.isFormula && draftData.actuals[m.id] !== undefined) {
                     document.getElementById(`a_${m.id}`).value = draftData.actuals[m.id];
                 }
             });
-            console.log("Draft berhasil dimuat dari Local Storage.");
         } catch (e) {
             console.error("Gagal membaca memori Local Storage", e);
         }
     }
 }
 
-// ==========================
-
+// === FITUR TARGET DINAMIS (DARI GOOGLE SHEETS) ===
 async function fetchDynamicTargets() {
     const btnSubmit = document.getElementById('btn-submit');
     const originalBtnText = btnSubmit.innerHTML;
+    
+    // Cegah error fetch jika URL belum diganti
+    if (SCRIPT_URL.includes("AKfycbx...")) {
+        console.warn("SCRIPT_URL belum diganti. Menggunakan target hardcode.");
+        return; 
+    }
+
     btnSubmit.innerHTML = "⏳ Memuat Target Terbaru...";
     
     try {
@@ -197,17 +206,20 @@ async function fetchDynamicTargets() {
         if (result.status === "success") {
             result.targets.forEach(t => {
                 const targetInput = document.getElementById(`t_${t.id}`);
-                if (targetInput) targetInput.value = t.target;
+                if (targetInput && t.id !== 'nps') {
+                    targetInput.value = t.target;
+                }
             });
-            generateReport(); // Refresh hitungan setelah target baru masuk
+            generateReport(); 
         }
     } catch (error) {
-        console.error("Gagal memuat target dinamis, menggunakan data hardcode.", error);
+        console.warn("Offline / Gagal memuat target dinamis. Menggunakan target bawaan. Error:", error);
     } finally {
         btnSubmit.innerHTML = originalBtnText;
     }
 }
 
+// === FITUR KIRIM DATA KE GOOGLE SHEETS ===
 async function submitToSheets() {
     if (SCRIPT_URL.includes("AKfycbx...")) {
         alert("Harap ganti SCRIPT_URL dengan Web App URL Google Apps Script Anda terlebih dahulu!");
@@ -217,6 +229,7 @@ async function submitToSheets() {
     const btnSubmit = document.getElementById('btn-submit');
     const originalBtnText = btnSubmit.innerHTML;
 
+    // Validasi input
     const tanggal = document.getElementById('tanggal').value;
     const shift = document.getElementById('shift').value;
     const staf = document.getElementById('staf').value;
@@ -227,12 +240,14 @@ async function submitToSheets() {
         return;
     }
 
+    // Susun format data untuk dikirim ke Google Sheets (Backend)
     const payload = { header: { tanggal, shift, staf, crew }, metrics: {} };
 
     metrics.forEach(m => {
         const targetVal = document.getElementById(`t_${m.id}`).value || "0";
         let actualVal = document.getElementById(`a_${m.id}`).value || "0";
         
+        // Ambil nilai APC dari kotak jika itu metrik formula
         if (m.id === 'apc') actualVal = document.getElementById('a_apc').value || "0";
         
         payload.metrics[m.id] = {
@@ -255,13 +270,13 @@ async function submitToSheets() {
 
         if (resData.status === "success") {
             alert("✅ Data berhasil disimpan ke Google Sheets!");
-            // Bersihkan memori draft jika sudah sukses terkirim
-            localStorage.removeItem(STORAGE_KEY);
+            // Bersihkan draft setelah sukses terkirim
+            localStorage.removeItem(STORAGE_KEY); 
         } else {
             alert("⚠️ Gagal menyimpan data: " + resData.message);
         }
     } catch (err) {
-        console.error(err);
+        console.error("Error Submit:", err);
         alert("❌ Terjadi kesalahan koneksi saat mengirim data!");
     } finally {
         btnSubmit.disabled = false;
@@ -269,6 +284,7 @@ async function submitToSheets() {
     }
 }
 
+// === FITUR UI LAINNYA ===
 function copyToClipboard() {
     const textarea = document.getElementById('output-text');
     if(!textarea.value) return alert('Isi data terlebih dahulu!');
@@ -288,9 +304,8 @@ function resetActualOnly() {
         document.getElementById('staf').value = "";
         document.getElementById('crew').value = "";
         
-        // Bersihkan draft dari local storage
+        // Hapus juga memori draft
         localStorage.removeItem(STORAGE_KEY);
-        
         generateReport();
     }
 }
