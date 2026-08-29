@@ -1,7 +1,7 @@
 // script.js
 
 // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwykFX4UdmFTH4H1pCyJrUFg7vDqfuQBud3o5bv8fmu6qF5VYvT2B4vhUZ6JVjDqeWP/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkvUoc6mCEkOhFWFclBXOvNnJZ2xds8rArK3WbpgQNqv3avPzIu19gTs96_s9pAJd2/exec";
 const STORAGE_KEY = "REPORT_DRAFT_DATA"; // Kunci untuk Local Storage
 
 const metrics = [
