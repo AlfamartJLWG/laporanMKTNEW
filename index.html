@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Laporan Marketing & Sales</title>
+    
+    <!-- Memanggil Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- Memanggil file CSS eksternal -->
+    <link rel="stylesheet" href="style.css">
+        <!-- Konfigurasi PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3281/3281289.png">
+</head>
+<body class="bg-gray-100 min-h-screen py-8 px-4">
+
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold uppercase tracking-wide">📊 Input Laporan Marketing & Sales</h1>
+            <p class="text-blue-100 text-sm mt-1">Target Dikunci (Readonly) • Actual APC Otomatis (SPD / STD) • Sync to Sheets</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            <!-- Kolom Kiri: Input Data -->
+            <div class="space-y-6">
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-600 uppercase">Tanggal</label>
+                        <input type="date" id="tanggal" class="w-full mt-1 p-2 border rounded bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase">Shift</label>
+                        <input type="text" id="shift" placeholder="Contoh: 3" class="w-full mt-1 p-2 border rounded bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase">Staf</label>
+                        <input type="text" id="staf" placeholder="Nama Staf" class="w-full mt-1 p-2 border rounded bg-white">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-600 uppercase">Crew</label>
+                        <input type="text" id="crew" placeholder="Nama Crew" class="w-full mt-1 p-2 border rounded bg-white">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
+                                <th class="p-2 rounded-l">Indikator / Item</th>
+                                <th class="p-2 w-28">Target</th>
+                                <th class="p-2 w-28 rounded-r">Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metric-fields" class="text-sm divider-y divider-gray-100">
+                            <!-- Baris tabel akan di-generate oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Preview Teks & Tombol Aksi -->
+            <div class="flex flex-col h-full justify-between bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                        📝 Preview Teks Laporan
+                    </h3>
+                    <textarea id="output-text" readonly class="w-full h-[400px] p-3 bg-gray-900 text-green-400 font-mono text-xs rounded-lg border border-gray-300 resize-none focus:outline-none focus:ring-0" placeholder="Hasil laporan akan muncul di sini secara otomatis..."></textarea>
+                </div>
+                
+                <div class="mt-4 grid grid-cols-1 gap-3">
+                    <!-- Tombol Kirim ke Google Sheets -->
+                    <button onclick="submitToSheets()" id="btn-submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition cursor-pointer text-center text-sm shadow-md flex items-center justify-center gap-2">
+                        🚀 Simpan ke Google Sheets
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="resetActualOnly()" class="px-4 py-2.5 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition cursor-pointer text-center text-sm">
+                            🔄 Kosongkan Actual
+                        </button>
+                        <button onclick="copyToClipboard()" id="btn-copy" class="px-4 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition cursor-pointer text-center text-sm flex items-center justify-center gap-2">
+                            📋 Salin Teks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memanggil file JavaScript eksternal -->
+    <script src="script.js"></script>
+        <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((reg) => console.log('Service Worker terdaftar:', reg.scope))
+                    .catch((err) => console.log('Gagal mendaftarkan Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>
