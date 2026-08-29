@@ -1,7 +1,7 @@
 // script.js
 
 // ⚠️ PENTING: GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT MILIK ANDA
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby59YxNbotTt1_JCFtbbUw2eOaoMnIiBIKUpEXM6a15UUIFpA90Ri1ynF4IYOHRUt8u/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrcGrhERJdiJlKdILplc_VhjI9ZxHMpNPZYPmMurGqkyJxg7zRgSeAOOvejol6Pv0V/exec"; 
 const STORAGE_KEY = "REPORT_DRAFT_DATA";
 
 // Data metrik bawaan (Hardcode)
