@@ -55,7 +55,7 @@ function renderTable() {
 
     metrics.forEach(m => {
         const tr = document.createElement('tr');
-        tr.className = "border-b border-gray-100 hover:bg-gray-50";
+        tr.className = "border-b border-gray-100 hover:bg-white-50";
         
         if (m.isFormula) {
             tr.innerHTML = `
@@ -66,7 +66,7 @@ function renderTable() {
         } else {
             tr.innerHTML = `
                 <td class="p-2 font-medium text-gray-700">${m.label}</td>
-                <td class="p-1"><input type="number" id="t_${m.id}" value="${m.target}" readonly class="w-full p-1.5 border rounded text-right font-semibold bg-gray-100 text-gray-400 select-none cursor-not-allowed focus:outline-none"></td>
+                <td class="p-1"><input type="number" id="t_${m.id}" value="${m.target}" readonly class="w-full p-1.5 border rounded text-right font-semibold bg-slate-100 text-gray-400 select-none cursor-not-allowed focus:outline-none"></td>
                 <td class="p-1"><input type="number" id="a_${m.id}" oninput="generateReport()" class="w-full p-1.5 border rounded text-right focus:border-blue-500 focus:outline-none bg-white" placeholder="0"></td>
             `;
         }
